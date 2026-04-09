@@ -5,7 +5,13 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+
+function getBaseUrl(req) {
+  if (process.env.BASE_URL) return process.env.BASE_URL;
+  const proto = req.headers['x-forwarded-proto'] || req.protocol;
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  return `${proto}://${host}`;
+}
 const DATA_FILE = path.join(__dirname, 'data', 'links.json');
 
 // Garante que a pasta data existe
@@ -49,7 +55,7 @@ app.post('/api/encurtar', (req, res) => {
     const chave2 = crypto.randomBytes(3).toString('hex');
     links[chave2] = { url, criado: new Date().toISOString(), acessos: 0 };
     salvarLinks(links);
-    return res.json({ codigo: chave2, curto: `${BASE_URL}/${chave2}` });
+    return res.json({ codigo: chave2, curto: `${getBaseUrl(req)}/${chave2}` });
   }
 
   if (links[chave] && codigo) {
@@ -58,7 +64,7 @@ app.post('/api/encurtar', (req, res) => {
 
   links[chave] = { url, criado: new Date().toISOString(), acessos: 0 };
   salvarLinks(links);
-  res.json({ codigo: chave, curto: `${BASE_URL}/${chave}` });
+  res.json({ codigo: chave, curto: `${getBaseUrl(req)}/${chave}` });
 });
 
 // Listar todos os links
@@ -67,7 +73,7 @@ app.get('/api/links', (req, res) => {
   const lista = Object.entries(links).map(([codigo, dados]) => ({
     codigo,
     ...dados,
-    curto: `${BASE_URL}/${codigo}`
+    curto: `${getBaseUrl(req)}/${codigo}`
   }));
   res.json(lista);
 });
