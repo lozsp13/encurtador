@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Encurtador de Links</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    p.sub {
+      color: #666;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px;
+      margin-top: 16px;
+    }
+
+    label:first-child { margin-top: 0; }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: #6c63ff; }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover { background: #574fd6; }
+
+    .resultado {
+      display: none;
+      margin-top: 20px;
+      background: #f0edff;
+      border: 1.5px solid #c9c2ff;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .resultado span {
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .resultado a {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #6c63ff;
+      word-break: break-all;
+    }
+
+    .copiar {
+      margin-top: 10px;
+      background: white;
+      color: #6c63ff;
+      border: 1.5px solid #6c63ff;
+      padding: 8px;
+      font-size: 0.85rem;
+    }
+
+    .copiar:hover { background: #f0edff; }
+
+    .erro {
+      margin-top: 12px;
+      color: #c0392b;
+      font-size: 0.88rem;
+      display: none;
+    }
+
+    .lista-card {
+      max-width: 560px;
+      width: 100%;
+    }
+
+    .lista-card h2 {
+      font-size: 1.1rem;
+      color: #1a1a2e;
+      margin-bottom: 16px;
+    }
+
+    .link-item {
+      background: white;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .link-info { flex: 1; overflow: hidden; }
+
+    .link-info .curto {
+      font-weight: 700;
+      color: #6c63ff;
+      font-size: 0.95rem;
+    }
+
+    .link-info .original {
+      color: #888;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .link-info .meta {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      margin-top: 0;
+      width: auto;
+    }
+
+    .btn-del:hover { color: #c0392b; background: none; }
+
+    .vazio {
+      color: #aaa;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Encurtador de Links</h1>
+  <p class="sub">Cole uma URL longa e obtenha um link curto</p>
+
+  <div class="card">
+    <label for="url">URL original</label>
+    <input type="url" id="url" placeholder="https://exemplo.com/pagina-muito-longa" />
+
+    <label for="codigo">Código personalizado <span style="font-weight:400;color:#aaa">(opcional)</span></label>
+    <input type="text" id="codigo" placeholder="ex: meulink" maxlength="30" />
+
+    <button onclick="encurtar()">Encurtar</button>
+
+    <p class="erro" id="erro"></p>
+
+    <div class="resultado" id="resultado">
+      <span>Seu link curto:</span>
+      <a id="linkCurto" href="#" target="_blank"></a>
+      <button class="copiar" onclick="copiar()">Copiar link</button>
+    </div>
+  </div>
+
+  <div class="lista-card">
+    <h2>Links criados</h2>
+    <div id="lista"></div>
+  </div>
+
+  <script>
+    async function encurtar() {
+      const url = document.getElementById('url').value.trim();
+      const codigo = document.getElementById('codigo').value.trim();
+      const erroEl = document.getElementById('erro');
+      const resultadoEl = document.getElementById('resultado');
+
+      erroEl.style.display = 'none';
+      resultadoEl.style.display = 'none';
+
+      if (!url) {
+        erroEl.textContent = 'Informe uma URL.';
+        erroEl.style.display = 'block';
+        return;
+      }
+
+      const res = await fetch('/api/encurtar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, codigo })
+      });
+
+      const dados = await res.json();
+
+      if (!res.ok) {
+        erroEl.textContent = dados.erro;
+        erroEl.style.display = 'block';
+        return;
+      }
+
+      const linkEl = document.getElementById('linkCurto');
+      linkEl.href = dados.curto;
+      linkEl.textContent = dados.curto;
+      resultadoEl.style.display = 'block';
+
+      document.getElementById('url').value = '';
+      document.getElementById('codigo').value = '';
+      carregarLista();
+    }
+
+    function copiar() {
+      const texto = document.getElementById('linkCurto').textContent;
+      navigator.clipboard.writeText(texto).then(() => {
+        const btn = document.querySelector('.copiar');
+        btn.textContent = 'Copiado!';
+        setTimeout(() => btn.textContent = 'Copiar link', 2000);
+      });
+    }
+
+    async function deletar(codigo) {
+      await fetch(`/api/links/${codigo}`, { method: 'DELETE' });
+      carregarLista();
+    }
+
+    async function carregarLista() {
+      const res = await fetch('/api/links');
+      const links = await res.json();
+      const listaEl = document.getElementById('lista');
+
+      if (links.length === 0) {
+        listaEl.innerHTML = '<p class="vazio">Nenhum link criado ainda.</p>';
+        return;
+      }
+
+      links.sort((a, b) => new Date(b.criado) - new Date(a.criado));
+
+      listaEl.innerHTML = links.map(l => `
+        <div class="link-item">
+          <div class="link-info">
+            <div class="curto"><a href="${l.curto}" target="_blank">${l.curto}</a></div>
+            <div class="original" title="${l.url}">${l.url}</div>
+            <div class="meta">${l.acessos} acesso(s) &bull; ${new Date(l.criado).toLocaleString('pt-BR')}</div>
+          </div>
+          <button class="btn-del" title="Remover" onclick="deletar('${l.codigo}')">&#x2715;</button>
+        </div>
+      `).join('');
+    }
+
+    carregarLista();
+  </script>
+</body>
+</html>

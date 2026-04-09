@@ -1,0 +1,12 @@
+{
+  "name": "encurtador-de-links",
+  "version": "1.0.0",
+  "description": "Encurtador de links simples",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
