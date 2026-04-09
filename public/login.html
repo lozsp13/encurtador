@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Encurtador</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    h1 { font-size: 1.5rem; color: #1a1a2e; margin-bottom: 6px; }
+    p { color: #888; font-size: 0.9rem; margin-bottom: 28px; }
+    label {
+      display: block;
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #6c63ff; }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #574fd6; }
+    .erro {
+      margin-top: 14px;
+      color: #c0392b;
+      font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Encurtador de Links</h1>
+    <p>Acesso restrito</p>
+    <form method="POST" action="/login">
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" placeholder="Digite sua senha" autofocus required/>
+      <button type="submit">Entrar</button>
+    </form>
+    <div id="erroMsg"></div>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('erro')) {
+      const el = document.getElementById('erroMsg');
+      el.className = 'erro';
+      el.textContent = 'Senha incorreta. Tente novamente.';
+    }
+  </script>
+</body>
+</html>
