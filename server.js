@@ -72,11 +72,11 @@ app.get('/:codigo', async (req, res, next) => {
   if (req.params.codigo === 'login' || req.params.codigo === 'logout') return next();
   try {
     const result = await pool.query('SELECT url FROM links WHERE codigo = $1', [req.params.codigo]);
-    if (result.rows.length === 0) return next();
+    if (result.rows.length === 0) return res.status(404).send('Link não encontrado');
     await pool.query('UPDATE links SET acessos = acessos + 1 WHERE codigo = $1', [req.params.codigo]);
     res.redirect(result.rows[0].url);
   } catch (err) {
-    next(err);
+    res.status(500).send('Erro interno');
   }
 });
 
